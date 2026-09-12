@@ -1,0 +1,53 @@
+# Environment overrides for the "dev" (OpenShift Local / CRC) install of
+# the release-penpot chart (https://github.com/dragos1993/release-penpot).
+#
+# This CRC node runs with a small, fixed amount of memory (~10Gi
+# allocatable) and already hosts several other operators/apps (ArgoCD,
+# Tekton Pipelines, a sample app, etc.) that together request close to
+# 100% of it. There isn't enough spare *requested* memory left for
+# Penpot's 6 containers to be admitted with the chart's normal
+# (production-sane) requests, so every component below clears
+# `resources` entirely (both requests AND limits -- note that setting
+# only `limits` is not enough: the API server auto-fills a missing
+# `requests` to match a given `limits`, which still reserves the same
+# amount and keeps pods Pending here). Clearing both makes these pods
+# BestEffort QoS: no scheduling reservation, first to be OOM-killed
+# under real memory pressure, but able to actually fit and use
+# whatever real memory the node has spare. Fine for local dev/test;
+# on any cluster with real headroom, delete this file's `resources`
+# overrides and let the chart defaults (release-penpot/values.yaml)
+# apply instead.
+
+publicHost: "penpot.apps-crc.testing"
+
+backend:
+  resources:
+    requests: null
+    limits: null
+
+frontend:
+  resources:
+    requests: null
+    limits: null
+
+exporter:
+  resources:
+    requests: null
+    limits: null
+
+postgresql:
+  storage: 3Gi
+  resources:
+    requests: null
+    limits: null
+
+valkey:
+  resources:
+    requests: null
+    limits: null
+
+minio:
+  storage: 5Gi
+  resources:
+    requests: null
+    limits: null
