@@ -10,6 +10,12 @@ keeps the chart reusable across environments and keeps environment drift
 visible in one small diff-able file per environment, instead of forked
 copies of the whole chart.
 
+The two storage-size knobs this file sets, `postgresql.storage` and
+`minio.storage`, map 1:1 to the only two components with a PVC —
+`penpot-postgres` and `penpot-minio` (see
+`release-penpot/README.md`). Valkey has no storage knob because it has
+no PVC at all; backend/frontend/exporter are stateless.
+
 ## Files
 
 - `values-dev.yaml` — the OpenShift Local (CRC) dev/test environment.
@@ -74,7 +80,8 @@ oc get route penpot -n penpot -o jsonpath='{.spec.host}{"\n"}'
 oc get pods -n penpot -o jsonpath='{range .items[*]}{.metadata.name}{" "}{.status.qosClass}{"\n"}{end}'
 
 # Storage sizes requested (crc-csi-hostpath-provisioner doesn't
-# enforce these, but the PVC spec should still match what was asked for)
+# enforce these, but the PVC spec should still match what was asked for).
+# Expect exactly 2 rows: penpot-postgres and penpot-minio.
 oc get pvc -n penpot -o jsonpath='{range .items[*]}{.metadata.name}{" requested="}{.spec.resources.requests.storage}{" capacity="}{.status.capacity.storage}{"\n"}{end}'
 ```
 
